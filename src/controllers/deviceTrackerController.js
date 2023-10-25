@@ -43,6 +43,7 @@ const addOnedeviceTracker = async (req, res) => {
       deviceId,
       imageCounter,
       textCounter,
+      createdAt: Timekoto(),
       updatedAt: Timekoto(),
     };
     //store data on database
@@ -58,23 +59,26 @@ const addOnedeviceTracker = async (req, res) => {
   }
 };
 
-//update one deviceTracker
 const updatedeviceTrackerById = async (req, res) => {
   try {
     const deviceId = req.params.deviceId;
     const query = { deviceId: deviceId };
+
+    // Retrieve the full document from the database
+    const existingDocument = await deviceTrackersCollection.findOne(query);
+
+    if (!existingDocument) {
+      return res.status(404).send({ message: "Device not found" });
+    }
+
     const data = req?.body;
-    let formattedData = { ...data };
-    if (!formattedData) {
-      return res.status(400).send({ message: "Incomplete Inputs" });
-    }
-    //update data on database
-    const result = await deviceTrackersCollection.updateOne(query, {
-      $set: formattedData,
-    });
-    if (result?.modifiedCount === 0) {
-      return res.status(500).send({ message: "No modifications were made" });
-    }
+    let formattedData = { ...existingDocument, ...data, updatedAt: Timekoto() };
+
+    // Update the full document in the database
+    const result = await deviceTrackersCollection.replaceOne(
+      query,
+      formattedData
+    );
     res.send(formattedData);
   } catch (err) {
     console.error(err);
