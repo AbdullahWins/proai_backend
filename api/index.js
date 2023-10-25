@@ -12,7 +12,7 @@ const port = process.env.SERVER_PORT || 5000;
 
 //import database connection
 const { connect } = require("../config/database/db.js");
-const routes = require("./routes/main/routes.js");
+const routes = require("../src/routes/main/routes.js");
 app.use(routes);
 
 //starting the server

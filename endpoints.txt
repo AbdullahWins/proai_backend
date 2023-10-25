@@ -1,1 +1,7 @@
 Author: https://github.com/abdullahwins
+
+//device Tracker
+router.get("/tracker/:deviceId", getOnedeviceTracker);
+router.post("/tracker/add", addOnedeviceTracker); = { deviceId, imageCounter, textCounter }
+router.patch("/tracker/:deviceId", updatedeviceTrackerById);
+router.delete("/tracker/:deviceId", deleteOnedeviceTrackerById);
