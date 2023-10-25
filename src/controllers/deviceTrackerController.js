@@ -31,22 +31,33 @@ const addOnedeviceTracker = async (req, res) => {
     if (!deviceId || !imageCounter || !textCounter) {
       return res.status(400).send("Incomplete Inputs");
     }
-    //check if deviceTracker already exists
-    const deviceTrackerExists = await deviceTrackersCollection.findOne({
-      deviceId: deviceId,
-    });
-    if (deviceTrackerExists) {
-      return res.status(400).send({ message: "deviceTracker already exists" });
-    }
+    const query = { deviceId: deviceId };
     //formatdata
     let formattedData = {
       deviceId,
       imageCounter,
       textCounter,
-      createdAt: Timekoto(),
       updatedAt: Timekoto(),
     };
+    //check if deviceTracker already exists
+    const deviceTrackerExists = await deviceTrackersCollection.findOne({
+      deviceId: deviceId,
+    });
+    if (deviceTrackerExists) {
+      const result = await deviceTrackersCollection.updateOne(query, {
+        $set: formattedData,
+      });
+      if (result?.acknowledged === false) {
+        return res.status(500).send({ message: "Failed to add deviceTracker" });
+      } else {
+        const tracker = await deviceTrackersCollection.findOne({
+          deviceId: deviceId,
+        });
+        return res.send(tracker);
+      }
+    }
     //store data on database
+    formattedData = { ...formattedData, createdAt: Timekoto() };
     const result = await deviceTrackersCollection.insertOne(formattedData);
     if (result?.acknowledged === false) {
       return res.status(500).send({ message: "Failed to add deviceTracker" });
