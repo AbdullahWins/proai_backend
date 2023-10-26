@@ -25,10 +25,12 @@ const getOnedeviceTracker = async (req, res) => {
 const addOnedeviceTracker = async (req, res) => {
   try {
     const data = req?.body;
-    console.log(data);
+    if (data === null) {
+      return res.status(400).send("No data sent");
+    }
     const { deviceId, imageCounter, textCounter } = data;
     //validate inputs
-    if (!deviceId || !imageCounter || !textCounter) {
+    if (!deviceId) {
       return res.status(400).send("Incomplete Inputs");
     }
     const query = { deviceId: deviceId };
@@ -44,8 +46,9 @@ const addOnedeviceTracker = async (req, res) => {
       deviceId: deviceId,
     });
     if (deviceTrackerExists) {
+      const updatedData = { ...data };
       const result = await deviceTrackersCollection.updateOne(query, {
-        $set: formattedData,
+        $set: updatedData,
       });
       if (result?.acknowledged === false) {
         return res.status(500).send({ message: "Failed to add deviceTracker" });
@@ -54,15 +57,16 @@ const addOnedeviceTracker = async (req, res) => {
         console.log(tracker);
         return res.send(tracker);
       }
+    } else {
+      //store data on database
+      formattedData = { ...formattedData, createdAt: Timekoto() };
+      const result = await deviceTrackersCollection.insertOne(formattedData);
+      if (result?.acknowledged === false) {
+        return res.status(500).send({ message: "Failed to add deviceTracker" });
+      }
+      console.log(formattedData);
+      return res.send(formattedData);
     }
-    //store data on database
-    formattedData = { ...formattedData, createdAt: Timekoto() };
-    const result = await deviceTrackersCollection.insertOne(formattedData);
-    if (result?.acknowledged === false) {
-      return res.status(500).send({ message: "Failed to add deviceTracker" });
-    }
-    console.log(formattedData);
-    res.send(formattedData);
   } catch (err) {
     console.error(err);
     res.status(500).send({ message: "Failed to add deviceTracker" });
