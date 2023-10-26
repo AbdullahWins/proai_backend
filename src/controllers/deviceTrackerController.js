@@ -10,7 +10,7 @@ const getOnedeviceTracker = async (req, res) => {
       deviceId: deviceId,
     });
     if (!deviceTracker) {
-      res.status(404).send({ message: "deviceTracker not found" });
+      res.status(500).send({ message: "deviceTracker not found" });
     } else {
       res.send(deviceTracker);
       console.log(deviceTracker);
@@ -50,9 +50,8 @@ const addOnedeviceTracker = async (req, res) => {
       if (result?.acknowledged === false) {
         return res.status(500).send({ message: "Failed to add deviceTracker" });
       } else {
-        const tracker = await deviceTrackersCollection.findOne({
-          deviceId: deviceId,
-        });
+        const tracker = { ...deviceTrackerExists, ...formattedData };
+        console.log(tracker);
         return res.send(tracker);
       }
     }
@@ -62,8 +61,8 @@ const addOnedeviceTracker = async (req, res) => {
     if (result?.acknowledged === false) {
       return res.status(500).send({ message: "Failed to add deviceTracker" });
     }
-    res.send(formattedData);
     console.log(formattedData);
+    res.send(formattedData);
   } catch (err) {
     console.error(err);
     res.status(500).send({ message: "Failed to add deviceTracker" });
@@ -90,6 +89,11 @@ const updatedeviceTrackerById = async (req, res) => {
       query,
       formattedData
     );
+    if (result?.acknowledged === false) {
+      return res
+        .status(500)
+        .send({ message: "Failed to update deviceTracker" });
+    }
     res.send(formattedData);
   } catch (err) {
     console.error(err);
