@@ -59,7 +59,13 @@ const addOnedeviceTracker = async (req, res) => {
       }
     } else {
       //store data on database
-      formattedData = { ...formattedData, createdAt: Timekoto() };
+      formattedData = {
+        deviceId,
+        imageCounter: 1,
+        textCounter: 1,
+        updatedAt: Timekoto(),
+        createdAt: Timekoto(),
+      };
       const result = await deviceTrackersCollection.insertOne(formattedData);
       if (result?.acknowledged === false) {
         return res.status(500).send({ message: "Failed to add deviceTracker" });
